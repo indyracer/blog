@@ -46,7 +46,7 @@ class Blog(db.Model):
 
 class MainPage(Handler):
     def get (self):
-        comments = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC")
+        comments = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC LIMIT 5")
         t = jinja_env.get_template("front.html")
         response = t.render(comments = comments)
         self.response.write(response)
@@ -76,7 +76,9 @@ class NewPost(Handler):
             self.redirect("/")
         else:
             error = "we need both a title and a comment"
-            self.render_front(title, comment, error)
+            t = jinja_env.get_template("blogform.html")
+            response = t.render(title = title, comment = comment, error = error)
+            self.response.write(response)
 
 
 
