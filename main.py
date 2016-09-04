@@ -34,19 +34,34 @@ class Handler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
 
+    def renderError(self, error_code):
+        """sends an http error code and a generic "oops!" message to the client."""
+        self.error(error_code)
+        self.response.write("Oops! Something went wrong.")
+
 class Blog(db.Model):
     title = db.StringProperty(required = True)
     comment = db.TextProperty(required = True)
     created = db.DateTimeProperty(auto_now_add = True)
 
 class MainPage(Handler):
-    def render_front(self, title="", comment="", error=""):
+    def get (self):
         comments = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC")
-        self.render("front.html", title = title, comment = comment, error = error, comments = comments)
+        t = jinja_env.get_template("front.html")
+        response = t.render(comments = comments)
+        self.response.write(response)
 
 
+
+
+
+
+#set up blog new post submissions
+class NewPost(Handler):
     def get(self):
-        self.render_front()
+        t = jinja_env.get_template("blogform.html")
+        response = t.render(title = title, comment = comment, error = error)
+        self.reponse.write(response)
 
     def post(self):
         title = self.request.get("title")
@@ -61,12 +76,11 @@ class MainPage(Handler):
             error = "we need both a title and a comment"
             self.render_front(title, comment, error)
 
-#set up blog new post submissions
-class NewPost(Handler):
-    
+
 
 
 
 app = webapp2.WSGIApplication([
-    ('/', MainPage)
+    ('/', MainPage),
+    ('/newpost', NewPost)
 ], debug=True)

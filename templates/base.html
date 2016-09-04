@@ -1,4 +1,3 @@
-<!--
 <!DOCTYPE html>
 
 <html>
@@ -63,22 +62,9 @@
         <h1>Bob's Blog</h1>
 
         <p>To add a new comment <a href="blogform.html">click here</a></p>
--->
 
-{% extends "base.html" %}
+    {% block content %}
+    {% endblock %}
 
-{% block content %}
-    <h2>Previous Posts</h2>
-        <hr>
-        {% for comment in comments %}
-            <div class="comment">
-                <div class="comment-title">{{comment.title}}</div>
-                <pre class="comment-body">{{comment.comment}}</pre>
-            </div>
-        {% endfor %}
-{% endblock %}
-
-<!--
     </body>
 </html>
--->
