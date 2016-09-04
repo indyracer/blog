@@ -60,8 +60,10 @@ class MainPage(Handler):
 class NewPost(Handler):
     def get(self):
         t = jinja_env.get_template("blogform.html")
-        response = t.render(title = title, comment = comment, error = error)
-        self.reponse.write(response)
+        response = t.render(title = "", comment = "", error = "")
+        self.response.write(response)
+
+
 
     def post(self):
         title = self.request.get("title")
@@ -82,5 +84,5 @@ class NewPost(Handler):
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
-    ('/newpost', NewPost)
+    ('/newpost', NewPost),
 ], debug=True)
