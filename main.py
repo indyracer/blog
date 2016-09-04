@@ -15,11 +15,58 @@
 # limitations under the License.
 #
 import webapp2
+import os
+import jinja2
 
-class MainHandler(webapp2.RequestHandler):
+from google.appengine.ext import db
+
+template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
+
+class Handler(webapp2.RequestHandler):
+    def write(self, *a, **kw):
+        self.response.out.write(*a, **kw)
+
+    def render_str(self, template, **params):
+        t = jinja_env.get_template(template)
+        return t.render(params)
+
+    def render(self, template, **kw):
+        self.write(self.render_str(template, **kw))
+
+class Blog(db.Model):
+    title = db.StringProperty(required = True)
+    comment = db.TextProperty(required = True)
+    created = db.DateTimeProperty(auto_now_add = True)
+
+class MainPage(Handler):
+    def render_front(self, title="", comment="", error=""):
+        comments = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC")
+        self.render("front.html", title = title, comment = comment, error = error, comments = comments)
+
+
     def get(self):
-        self.response.write('Hello world!')
+        self.render_front()
+
+    def post(self):
+        title = self.request.get("title")
+        comment = self.request.get("comment")
+
+        if title and comment:
+            c = Blog(title = title, comment = comment)
+            c.put()
+
+            self.redirect("/")
+        else:
+            error = "we need both a title and a comment"
+            self.render_front(title, comment, error)
+
+#set up blog new post submissions
+class NewPost(Handler):
+    
+
+
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', MainPage)
 ], debug=True)
