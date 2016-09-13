@@ -72,7 +72,7 @@
         <hr>
         {% for comment in comments %}
             <div class="comment">
-                <div class="comment-title">{{comment.title}}</div>
+                <div class="comment-title"><a href="/blog/{{comment.key().id()}}">{{comment.title}}</a></div>
                 <pre class="comment-body">{{comment.comment}}</pre>
             </div>
         {% endfor %}

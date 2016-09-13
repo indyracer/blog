@@ -39,14 +39,15 @@ class Handler(webapp2.RequestHandler):
         self.error(error_code)
         self.response.write("Oops! Something went wrong.")
 
-class Blog(db.Model):
+class BlogDb(db.Model):
     title = db.StringProperty(required = True)
     comment = db.TextProperty(required = True)
     created = db.DateTimeProperty(auto_now_add = True)
 
-class MainPage(Handler):
+
+class Blog(Handler):
     def get (self):
-        comments = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC LIMIT 5")
+        comments = db.GqlQuery("SELECT * FROM BlogDb ORDER BY created DESC LIMIT 5")
         t = jinja_env.get_template("front.html")
         response = t.render(comments = comments)
         self.response.write(response)
@@ -70,21 +71,34 @@ class NewPost(Handler):
         comment = self.request.get("comment")
 
         if title and comment:
-            c = Blog(title = title, comment = comment)
+            c = BlogDb(title = title, comment = comment)
             c.put()
 
-            self.redirect("/")
+            self.redirect("/blog/%(c.key().id())s")
         else:
             error = "we need both a title and a comment"
             t = jinja_env.get_template("blogform.html")
             response = t.render(title = title, comment = comment, error = error)
             self.response.write(response)
 
+class ViewPostHandler(Handler):
+    def get(self, id):
+        int_id = int(id)
+        idnum = BlogDb.get_by_id(int_id)
 
+        if idnum:
+
+            self.render("viewpost.html", idnum=idnum)
+
+        else:
+            error = "<h1>There is no post by that id </h1>"
+            self.response.out.write(error)
 
 
 
 app = webapp2.WSGIApplication([
-    ('/', MainPage),
+    ('/blog', Blog),
     ('/newpost', NewPost),
+    #to set our dynamic link for individual blog post
+    webapp2.Route('/blog/<id:\d+>', ViewPostHandler)
 ], debug=True)
