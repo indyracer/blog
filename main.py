@@ -74,7 +74,8 @@ class NewPost(Handler):
             c = BlogDb(title = title, comment = comment)
             c.put()
 
-            self.redirect("/blog/%(c.key().id())s")
+            #self.redirect("/blog/c.key().id()")
+            self.redirect("/blog/%s" % c.key().id())
         else:
             error = "we need both a title and a comment"
             t = jinja_env.get_template("blogform.html")
